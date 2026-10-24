@@ -1,5 +1,10 @@
+import { auth } from "@clerk/nextjs/server";
 import {prisma} from "@/lib/prisma";
 export default async function Home() {
+  const { userId } = await auth();
+const me = userId
+  ? await prisma.user.findUnique({ where: { clerkId: userId } })
+  : null;
   const providers = await prisma.providerProfile.findMany({
     include: { user: true,services: true },
     orderBy: { experienceYears: "desc"},
@@ -8,6 +13,8 @@ export default async function Home() {
     <main style={{padding:24}}>
       <h1>FixNear</h1>
       <p>Find trusted local service providers near you.</p>
+      {userId && !me && <p><a href="/onboarding">Finish setting up your account →</a></p>}
+      {me && <p>Welcome, {me.name} ({me.role})</p>}
       <h2>Providers ({providers.length})</h2>
       <ul>
         {providers.map((p)=>(

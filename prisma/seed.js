@@ -60,7 +60,7 @@ async function main() {
   await prisma.booking.deleteMany();
   await prisma.service.deleteMany();
   await prisma.providerProfile.deleteMany();
-  await prisma.user.deleteMany();
+  await prisma.user.deleteMany({ where: { clerkId: { startsWith: "seed_" } } });
 
   for (const p of providers) {
     // Nested create: User + ProviderProfile + Services, oru query-la
