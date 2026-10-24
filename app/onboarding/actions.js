@@ -26,5 +26,5 @@ export async function chooseRole(formData) {
     },
   });
 
-  redirect("/");
+  redirect(role === "PROVIDER" ? "/provider/setup" : "/");
 }
