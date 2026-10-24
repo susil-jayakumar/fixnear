@@ -15,6 +15,7 @@ const me = userId
       <p>Find trusted local service providers near you.</p>
       {userId && !me && <p><a href="/onboarding">Finish setting up your account →</a></p>}
       {me && <p>Welcome, {me.name} ({me.role})</p>}
+      {me?.role === "PROVIDER" && <p><a href="/provider">Go to your dashboard →</a></p>}
       <h2>Providers ({providers.length})</h2>
       <ul>
         {providers.map((p)=>(

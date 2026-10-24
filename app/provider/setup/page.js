@@ -12,7 +12,7 @@ export default async function ProviderSetupPage() {
 
   if (!me) redirect("/onboarding");
   if (me.role !== "PROVIDER") redirect("/");
-  if (me.providerProfile) redirect("/");
+  if (me.providerProfile) redirect("/provider");
 
   return (
     <main style={{ padding: 24 }}>

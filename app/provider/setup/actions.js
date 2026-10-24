@@ -38,5 +38,5 @@ export async function saveProfile(prevState, formData) {
     create: { userId: me.id, category, area, phone, bio: bio || null, experienceYears },
   });
 
-  redirect("/");
+  redirect("/provider");
 }
