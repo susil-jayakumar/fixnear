@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
 import { formatDateTime } from "@/lib/format";
+import ActionButton from "./ActionButton";
 
 export default async function MyBookingsPage() {
   const me = await getCurrentUser();
@@ -29,9 +30,14 @@ export default async function MyBookingsPage() {
               <li key={b.id} style={{ marginBottom: 12 }}>
                 <strong>{b.service.title}</strong> with {b.provider.user.name}
                 <br />
-                {formatDateTime(b.scheduledAt)} · ₹{b.priceAtBooking} · <b>{b.status}</b>
+                {formatDateTime(b.scheduledAt)} · ₹{b.priceAtBooking} · <b>{b.status}</b> · {b.paymentStatus}
                 <br />
                 {showPhone ? `Phone: ${b.provider.phone}` : "Phone number is shared after the provider accepts"}
+                {b.status === "PENDING" && (
+  <div style={{ marginTop: 6 }}>
+    <ActionButton bookingId={b.id} action="cancel" label="Cancel request" />
+  </div>
+)}
               </li>
             );
           })}
