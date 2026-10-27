@@ -2,8 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
-import { formatDateTime } from "@/lib/format";
 import ActionButton from "./ActionButton";
+import ReviewForm from "./ReviewForm";
+import { formatDateTime, stars } from "@/lib/format";
 
 export default async function MyBookingsPage() {
   const me = await getCurrentUser();
@@ -11,7 +12,7 @@ export default async function MyBookingsPage() {
 
   const bookings = await prisma.booking.findMany({
     where: { customerId: me.id },
-    include: { service: true, provider: { include: { user: true } } },
+    include: { service: true, provider: { include: { user: true } }, review: true },
     orderBy: { scheduledAt: "asc" },
   });
 
@@ -37,6 +38,17 @@ export default async function MyBookingsPage() {
   <div style={{ marginTop: 6 }}>
     <ActionButton bookingId={b.id} action="cancel" label="Cancel request" />
   </div>
+                
+)}
+{b.status === "COMPLETED" && (
+  b.review ? (
+    <div style={{ marginTop: 6 }}>
+      Your review: {stars(b.review.rating)}
+      {b.review.comment && <> · {b.review.comment}</>}
+    </div>
+  ) : (
+    <ReviewForm bookingId={b.id} />
+  )
 )}
               </li>
             );
