@@ -2,9 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/current-user";
+import { formatDateTime, stars } from "@/lib/format";
+import StatusBadge from "@/components/StatusBadge";
 import ActionButton from "./ActionButton";
 import ReviewForm from "./ReviewForm";
-import { formatDateTime, stars } from "@/lib/format";
 
 export default async function MyBookingsPage() {
   const me = await getCurrentUser();
@@ -17,39 +18,54 @@ export default async function MyBookingsPage() {
   });
 
   return (
-    <main style={{ padding: 24 }}>
-      <p><Link href="/">← Find providers</Link></p>
+    <main className="wrap page">
       <h1>My bookings</h1>
 
       {bookings.length === 0 ? (
-        <p>No bookings yet. <Link href="/">Find a provider</Link> to book your first service.</p>
+        <div className="empty" style={{ marginTop: "1.5rem" }}>
+          <p>You haven&apos;t booked anything yet.</p>
+          <Link href="/providers" className="btn btn-primary">Find a provider</Link>
+        </div>
       ) : (
-        <ul>
+        <ul className="tickets" style={{ marginTop: "1.5rem" }}>
           {bookings.map((b) => {
             const showPhone = b.status === "ACCEPTED" || b.status === "COMPLETED";
             return (
-              <li key={b.id} style={{ marginBottom: 12 }}>
-                <strong>{b.service.title}</strong> with {b.provider.user.name}
-                <br />
-                {formatDateTime(b.scheduledAt)} · ₹{b.priceAtBooking} · <b>{b.status}</b> · {b.paymentStatus}
-                <br />
-                {showPhone ? `Phone: ${b.provider.phone}` : "Phone number is shared after the provider accepts"}
+              <li key={b.id} className="ticket" data-status={b.status}>
+                <div className="ticket-top">
+                  <div>
+                    <h3>{b.service.title}</h3>
+                    <span className="muted">with <Link href={`/providers/${b.providerId}`}>{b.provider.user.name}</Link></span>
+                  </div>
+                  <div className="badges">
+                    <StatusBadge value={b.status} />
+                    {b.status === "COMPLETED" && <StatusBadge value={b.paymentStatus} />}
+                  </div>
+                </div>
+
+                <dl>
+                  <dt>When</dt><dd>{formatDateTime(b.scheduledAt)}</dd>
+                  <dt>Price</dt><dd className="price">₹{b.priceAtBooking}</dd>
+                  <dt>Phone</dt>
+                  <dd>{showPhone ? <a href={`tel:${b.provider.phone}`}>{b.provider.phone}</a> : <span className="muted">Shared once the provider accepts</span>}</dd>
+                </dl>
+
                 {b.status === "PENDING" && (
-  <div style={{ marginTop: 6 }}>
-    <ActionButton bookingId={b.id} action="cancel" label="Cancel request" />
-  </div>
-                
-)}
-{b.status === "COMPLETED" && (
-  b.review ? (
-    <div style={{ marginTop: 6 }}>
-      Your review: {stars(b.review.rating)}
-      {b.review.comment && <> · {b.review.comment}</>}
-    </div>
-  ) : (
-    <ReviewForm bookingId={b.id} />
-  )
-)}
+                  <div className="actions">
+                    <ActionButton bookingId={b.id} action="cancel" label="Cancel request" variant="danger" />
+                  </div>
+                )}
+
+                {b.status === "COMPLETED" && (
+                  b.review ? (
+                    <p className="review-form">
+                      Your review: <span className="stars">{stars(b.review.rating)}</span>
+                      {b.review.comment && <> {b.review.comment}</>}
+                    </p>
+                  ) : (
+                    <ReviewForm bookingId={b.id} />
+                  )
+                )}
               </li>
             );
           })}

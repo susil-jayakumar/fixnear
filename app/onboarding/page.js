@@ -9,12 +9,18 @@ export default async function OnboardingPage() {
   if (existing) redirect("/");
 
   return (
-    <main style={{ padding: 24 }}>
+    <main className="wrap page">
       <h1>Welcome to FixNear</h1>
-      <p>How will you use FixNear?</p>
-      <form action={chooseRole} style={{ display: "flex", gap: 12, marginTop: 16 }}>
-        <button type="submit" name="role" value="CUSTOMER">I need a service</button>
-        <button type="submit" name="role" value="PROVIDER">I provide services</button>
+      <p className="muted" style={{ marginTop: "0.5rem" }}>How will you use FixNear? You can&apos;t change this later.</p>
+      <form action={chooseRole} className="choices">
+        <button type="submit" name="role" value="CUSTOMER" className="choice">
+          <strong>I need a service</strong>
+          <span className="muted">Find local providers and book them.</span>
+        </button>
+        <button type="submit" name="role" value="PROVIDER" className="choice">
+          <strong>I provide services</strong>
+          <span className="muted">List your services and get booking requests.</span>
+        </button>
       </form>
     </main>
   );

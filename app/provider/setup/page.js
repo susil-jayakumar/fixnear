@@ -15,10 +15,12 @@ export default async function ProviderSetupPage() {
   if (me.providerProfile) redirect("/provider");
 
   return (
-    <main style={{ padding: 24 }}>
+    <main className="wrap page">
       <h1>Set up your provider profile</h1>
-      <p>Customers will see this when they search on FixNear.</p>
-      <ProfileForm />
+      <p className="muted" style={{ marginTop: "0.5rem" }}>Customers see this when they search for help in your area.</p>
+      <div style={{ marginTop: "1.5rem" }}>
+        <ProfileForm />
+      </div>
     </main>
   );
 }

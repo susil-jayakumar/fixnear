@@ -1,11 +1,11 @@
 import { updateBookingStatus } from "./actions";
 
-export default function ActionButton({ bookingId, action, label }) {
+export default function ActionButton({ bookingId, action, label, variant = "ghost" }) {
   return (
-    <form action={updateBookingStatus} style={{ display: "inline", marginRight: 8 }}>
+    <form action={updateBookingStatus} className="inline-form">
       <input type="hidden" name="bookingId" value={bookingId} />
       <input type="hidden" name="action" value={action} />
-      <button type="submit">{label}</button>
+      <button type="submit" className={`btn btn-sm btn-${variant}`}>{label}</button>
     </form>
   );
 }

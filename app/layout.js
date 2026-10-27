@@ -1,16 +1,11 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Atkinson_Hyperlegible } from "next/font/google";
 import { Suspense } from "react";
-import {
-  ClerkProvider,
-  Show,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
+import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const display = Bricolage_Grotesque({ variable: "--font-display", subsets: ["latin"] });
+const body = Atkinson_Hyperlegible({ variable: "--font-body", subsets: ["latin"], weight: ["400", "700"] });
 
 export const metadata = {
   title: "FixNear",
@@ -19,20 +14,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
       <body>
         <ClerkProvider>
-          <header style={{ display: "flex", justifyContent: "flex-end", gap: 12, padding: 16 }}>
-            <Suspense>
-              <Show when="signed-out">
-                <SignInButton />
-                <SignUpButton />
-              </Show>
-              <Show when="signed-in">
-                <UserButton />
-              </Show>
-            </Suspense>
-          </header>
+          <Suspense fallback={<header className="site-header"><div className="wrap" /></header>}>
+            <SiteHeader />
+          </Suspense>
           {children}
         </ClerkProvider>
       </body>

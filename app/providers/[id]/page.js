@@ -13,72 +13,83 @@ export default async function ProviderPage({ params }) {
       services: { orderBy: { price: "asc" } },
     },
   });
-
   if (!provider) notFound();
+
   const stats = await prisma.review.aggregate({
-  where: { booking: { providerId: id } },
-  _avg: { rating: true },
-  _count: true,
-});
-const avg = stats._avg.rating;
-const count = stats._count;
+    where: { booking: { providerId: id } },
+    _avg: { rating: true },
+    _count: true,
+  });
+  const avg = stats._avg.rating;
+  const count = stats._count;
 
-const reviews = await prisma.review.findMany({
-  where: { booking: { providerId: id } },
-  include: { booking: { include: { customer: true, service: true } } },
-  orderBy: { createdAt: "desc" },
-  take: 10,
-});
-  const reviewRows = await prisma.review.findMany({
-  where: { booking: { providerId: { in: providers.map((p) => p.id) } } },
-  select: { rating: true, booking: { select: { providerId: true } } },
-});
+  const reviews = await prisma.review.findMany({
+    where: { booking: { providerId: id } },
+    include: { booking: { include: { customer: true, service: true } } },
+    orderBy: { createdAt: "desc" },
+    take: 10,
+  });
 
-const ratings = {};
-for (const r of reviewRows) {
-  const pid = r.booking.providerId;
-  ratings[pid] ??= { sum: 0, count: 0 };
-  ratings[pid].sum += r.rating;
-  ratings[pid].count += 1;
-}
   return (
-    <main style={{ padding: 24 }}>
-      <p><Link href="/">← All providers</Link></p>
-      <h1>{provider.user.name}</h1>
-      <p>{provider.category} · {provider.area} · {provider.experienceYears} yrs experience</p>
-      {ratings[provider.id]
-  ? ` · ⭐ ${(ratings[provider.id].sum / ratings[provider.id].count).toFixed(1)} (${ratings[provider.id].count})`
-  : " · New"}
-      {provider.bio && <p>{provider.bio}</p>}
-      <p>{count > 0 ? `⭐ ${avg.toFixed(1)} (${count} review${count === 1 ? "" : "s"})` : "No reviews yet"}</p>
-      <h2>Services</h2>
-      {provider.services.length === 0 ? (
-        <p>No services listed yet.</p>
-      ) : (
-        <ul>
-          {provider.services.map((s) => (
-            <li key={s.id}>
-  {s.title}: ₹{s.price} · {s.durationMins} mins{" "}
-  <Link href={`/book/${s.id}`}>Book</Link>
-</li>
-          ))}
-        </ul>
-      )}
-      <h2>Reviews</h2>
-{reviews.length === 0 ? (
-  <p>No reviews yet.</p>
-) : (
-  <ul>
-    {reviews.map((r) => (
-      <li key={r.id} style={{ marginBottom: 10 }}>
-        {stars(r.rating)} · {r.booking.customer.name} · {r.booking.service.title}
-        <br />
-        {r.comment && <>{r.comment}<br /></>}
-        <small>{formatDateTime(r.createdAt)}</small>
-      </li>
-    ))}
-  </ul>
-)}
+    <main className="wrap page">
+      <Link href="/providers" className="back">← All providers</Link>
+
+      <div className="two-col">
+        <div>
+          <div className="profile-head">
+            <h1>{provider.user.name}</h1>
+            <div className="meta">
+              <span className="tag">{provider.category}</span>
+              <span>{provider.area}</span>
+              <span>{provider.experienceYears} yrs experience</span>
+            </div>
+            {count > 0 ? (
+              <span className="rating">
+                ★ {avg.toFixed(1)} <span className="muted">from {count} review{count === 1 ? "" : "s"}</span>
+              </span>
+            ) : (
+              <span className="rating-new">New on FixNear, no reviews yet</span>
+            )}
+            {provider.bio && <p>{provider.bio}</p>}
+          </div>
+
+          <h2>Reviews</h2>
+          {reviews.length === 0 ? (
+            <div className="empty"><p>Reviews appear here after customers complete a booking.</p></div>
+          ) : (
+            <ul>
+              {reviews.map((r) => (
+                <li key={r.id} className="review">
+                  <span className="stars" aria-label={`${r.rating} out of 5`}>{stars(r.rating)}</span>
+                  <div><strong>{r.booking.customer.name}</strong> <span className="muted">for {r.booking.service.title}</span></div>
+                  {r.comment && <p>{r.comment}</p>}
+                  <small className="muted">{formatDateTime(r.createdAt)}</small>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <aside className="panel">
+          <h2>Services and prices</h2>
+          {provider.services.length === 0 ? (
+            <p className="muted">This provider hasn't listed any services yet.</p>
+          ) : (
+            <ul>
+              {provider.services.map((s) => (
+                <li key={s.id} className="service-row">
+                  <span><strong>{s.title}</strong> <span className="price">₹{s.price}</span></span>
+                  <span className="muted">About {s.durationMins} mins</span>
+                  <Link href={`/book/${s.id}`} className="btn btn-primary btn-sm">Book</Link>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="muted" style={{ marginTop: "1rem", fontSize: "0.88rem" }}>
+            The provider&apos;s phone number is shared once they accept your booking.
+          </p>
+        </aside>
+      </div>
     </main>
   );
 }
